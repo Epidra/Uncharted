@@ -29,38 +29,38 @@ public class GuiBiomePanel extends AbstractGui {
     /** Minecraft Instance */
     private Minecraft mc;
     /** Biome the Player is currently in */
-    Biome biomePanel;
+    private Biome biomePanel;
     /** String version of the current Biome */
-    ResourceLocation biomeTexture;
+    private ResourceLocation biomeTexture;
     /** String version of the Static */
-    ResourceLocation biomeTextureStatic;
+    private ResourceLocation biomeTextureStatic;
     /** String version of the Overlay */
-    ResourceLocation biomeTextureOverlay;
+    private ResourceLocation biomeTextureOverlay;
     /** Trigger if Panel moves up or down */
-    boolean transitionUp;
+    private boolean transitionUp;
     /** Upward Position of Panel */
-    float timer;
+    private float timer;
     /** Absolute X Position of Panel (upper left edge) */
-    int posX;
+    private int posX;
     /** Absolute Y Position of Panel (upper left edge) */
-    int posY;
+    private int posY;
     /** Maximum Upward Position */
-    int timerMax;
-    /** Maximum Upward Position */
-    String[] biomeName = new String[]{"", "", ""};
-    String entering = "ENTERING...WORLD";
+    private int timerMax;
+    /** Dissected String of Biome Name */
+    private String[] biomeName = new String[]{"", "", ""};
+    /** Localized String for ENTERING message **/
+    private String entering = "ENTERING...WORLD";
 
     //boolean debugger = true;
-    boolean smallFrame = true;
-    float scale = 1.0f;
-    int height = 256;
-    boolean borderLower = true;
-    boolean borderLeft = false;
+    private boolean smallFrame = true;
+    private float scale = 1.0f;
+    private int height = 256;
+    private boolean borderLower = true;
+    private boolean borderLeft = false;
 
-    boolean animated = false;
-    boolean newBiome = false;
-    String[] stringlist = new String[]{"beach"};
-    int listindex = 0;
+    private boolean animated = false;
+    private String[] stringlist = new String[]{"beach"};
+    private int listindex = 0;
     //boolean testing = true;
 
 
@@ -82,7 +82,6 @@ public class GuiBiomePanel extends AbstractGui {
         biomeTextureOverlay = new ResourceLocation(Uncharted.MODID, "textures/overlay.png");
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onTravel);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onRenderExperienceBar);
-        //debugger = UnchartedConfig.debugger;
         smallFrame = UnchartedConfig.smallFrame;
         scale = (float)UnchartedConfig.scale/100.00f;
         borderLower = UnchartedConfig.borderLower;
@@ -93,49 +92,21 @@ public class GuiBiomePanel extends AbstractGui {
         } else {
             height = 64;
         }
-        //if(debugger){
-            //DebugBiome();
-        //}
-    }
-
-    private void DebugBiome(){
-        for (Biome biome : ForgeRegistries.BIOMES.getValues()) {
-            LoadBiome();
-        }
-        //debugger = false;
     }
 
     private void LoadBiome(){
         ITextureObject texture = mc.getTextureManager().getTexture(new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png"));
-        //if(testing){
-       //     listindex++;
-       //     if(listindex == stringlist.length){
-       //         listindex = 0;
-       //         testing = false;
-       //     }
-       // } else {
             if(texture instanceof DynamicTexture) { // texture file not found
                 listindex++;
                 if (listindex == stringlist.length) {
-                    //if (debugger) Uncharted.LOGGER.info("MISSING:  " + stringlist[0]);
                     biomeTexture = biomeTextureStatic;
                     animated = true;
-                    //newBiome = false;
                     listindex = 0;
                 }
             } else {
-                //if(debugger) {
-                //    if(listindex == 0) {
-                //        Uncharted.LOGGER.info("LOADING:  " + stringlist[listindex]);
-                //    } else {
-                //        Uncharted.LOGGER.info("SETTING:  " + stringlist[0] + "  <---  " + stringlist[listindex]);
-                //    }
-                //}
                 biomeTexture = new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png");
                 animated = false;
-                //newBiome = false;
             }
-       // }
     }
 
 
@@ -145,8 +116,7 @@ public class GuiBiomePanel extends AbstractGui {
     /** Event fires on Player Movement, checks if Player moves into a new Biome */
     @SubscribeEvent
     public void onTravel(LivingEvent.LivingUpdateEvent event){
-        newBiome = false;
-        //if(!newBiome){
+        boolean newBiome = false;
             if(event.getEntity() instanceof PlayerEntity){
                 if(event.getEntity().dimension == DimensionType.OVERWORLD){ // Checks for Overworld
                     if(event.getEntity().world.canBlockSeeSky(event.getEntity().getPosition())){
@@ -163,7 +133,6 @@ public class GuiBiomePanel extends AbstractGui {
             if(newBiome){ // trigger for when we travel into a new Biome
                 biomePanel = event.getEntity().world.getBiome(event.getEntity().getPosition());
                 transitionUp = true;
-                //LoadBiome(biomePanel);
                 String translatedKey = net.minecraft.client.resources.I18n.format(biomePanel.getTranslationKey());
                 entering = net.minecraft.client.resources.I18n.format("gui.uncharted.entering");
                 biomeName = translatedKey.split(" ");
@@ -171,17 +140,13 @@ public class GuiBiomePanel extends AbstractGui {
                 if(templist.length > 1){
                     stringlist = new String[templist.length + 1];
                     stringlist[0] = biomePanel.getRegistryName().getPath();
-                    for(int i = 0; i < templist.length; i++){
-                        stringlist[i+1] = templist[i];
-                    }
+                    System.arraycopy(templist, 0, stringlist, 1, templist.length);
                 } else {
                     stringlist = new String[1];
                     stringlist[0] = biomePanel.getRegistryName().getPath();
                 }
                 listindex = 0;
-                //testing = true;
             }
-        //}
     }
 
     /** Hooks into Render Event for Experience Bar, draws Biome Panel */
@@ -191,7 +156,6 @@ public class GuiBiomePanel extends AbstractGui {
         if(event.isCancelable() || event.getType() != RenderGameOverlayEvent.ElementType.HELMET){
             return;
         }
-
 
         if(transitionUp){
             if(timer >= timerMax){
@@ -207,10 +171,6 @@ public class GuiBiomePanel extends AbstractGui {
                 timer -= 1;
             }
         }
-
-        //if(newBiome){
-        //    LoadBiome();
-        //}
 
         if(timer > 0){
             LoadBiome();
@@ -242,10 +202,10 @@ public class GuiBiomePanel extends AbstractGui {
 
     private void DrawString(String text, int posX, int posY, boolean rightsided){
         if(rightsided){
-            drawRightAlignedString(mc.fontRenderer, text, (int)((posX + 0)/scale), (int)((posY + 0)/scale), 0);
+            drawRightAlignedString(mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
             drawRightAlignedString(mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
         } else {
-            drawString(mc.fontRenderer, text, (int)((posX + 0)/scale), (int)((posY + 0)/scale), 0);
+            drawString(mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY   )/scale), 0);
             drawString(mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
         }
     }
