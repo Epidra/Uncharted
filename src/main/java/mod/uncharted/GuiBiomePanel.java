@@ -51,7 +51,6 @@ public class GuiBiomePanel extends AbstractGui {
     /** Localized String for ENTERING message **/
     private String entering = "ENTERING...WORLD";
 
-    //boolean debugger = true;
     private boolean smallFrame = true;
     private float scale = 1.0f;
     private int height = 256;
@@ -61,7 +60,6 @@ public class GuiBiomePanel extends AbstractGui {
     private boolean animated = false;
     private String[] stringlist = new String[]{"beach"};
     private int listindex = 0;
-    //boolean testing = true;
 
 
 
@@ -96,17 +94,17 @@ public class GuiBiomePanel extends AbstractGui {
 
     private void LoadBiome(){
         ITextureObject texture = mc.getTextureManager().getTexture(new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png"));
-            if(texture instanceof DynamicTexture) { // texture file not found
-                listindex++;
-                if (listindex == stringlist.length) {
-                    biomeTexture = biomeTextureStatic;
-                    animated = true;
-                    listindex = 0;
-                }
-            } else {
-                biomeTexture = new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png");
-                animated = false;
+        if(texture instanceof DynamicTexture) { // texture file not found
+            listindex++;
+            if (listindex == stringlist.length) {
+                biomeTexture = biomeTextureStatic;
+                animated = true;
+                listindex = 0;
             }
+        } else {
+            biomeTexture = new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png");
+            animated = false;
+        }
     }
 
 
@@ -117,36 +115,36 @@ public class GuiBiomePanel extends AbstractGui {
     @SubscribeEvent
     public void onTravel(LivingEvent.LivingUpdateEvent event){
         boolean newBiome = false;
-            if(event.getEntity() instanceof PlayerEntity){
-                if(event.getEntity().dimension == DimensionType.OVERWORLD){ // Checks for Overworld
-                    if(event.getEntity().world.canBlockSeeSky(event.getEntity().getPosition())){
-                        if(biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
-                            newBiome = true;
-                        }
-                    }
-                } else { // Other dimensions might have ceiling, hence cannot check for .canBlockSeeSky()
+        if(event.getEntity() instanceof PlayerEntity){
+            if(event.getEntity().dimension == DimensionType.OVERWORLD){ // Checks for Overworld
+                if(event.getEntity().world.canBlockSeeSky(event.getEntity().getPosition())){
                     if(biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
                         newBiome = true;
                     }
                 }
-            }
-            if(newBiome){ // trigger for when we travel into a new Biome
-                biomePanel = event.getEntity().world.getBiome(event.getEntity().getPosition());
-                transitionUp = true;
-                String translatedKey = net.minecraft.client.resources.I18n.format(biomePanel.getTranslationKey());
-                entering = net.minecraft.client.resources.I18n.format("gui.uncharted.entering");
-                biomeName = translatedKey.split(" ");
-                String[] templist = biomePanel.getRegistryName().getPath().split("_");
-                if(templist.length > 1){
-                    stringlist = new String[templist.length + 1];
-                    stringlist[0] = biomePanel.getRegistryName().getPath();
-                    System.arraycopy(templist, 0, stringlist, 1, templist.length);
-                } else {
-                    stringlist = new String[1];
-                    stringlist[0] = biomePanel.getRegistryName().getPath();
+            } else { // Other dimensions might have ceiling, hence cannot check for .canBlockSeeSky()
+                if(biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
+                    newBiome = true;
                 }
-                listindex = 0;
             }
+        }
+        if(newBiome){ // trigger for when we travel into a new Biome
+            biomePanel = event.getEntity().world.getBiome(event.getEntity().getPosition());
+            transitionUp = true;
+            String translatedKey = net.minecraft.client.resources.I18n.format(biomePanel.getTranslationKey());
+            entering = net.minecraft.client.resources.I18n.format("gui.uncharted.entering");
+            biomeName = translatedKey.split(" ");
+            String[] templist = biomePanel.getRegistryName().getPath().split("_");
+            if(templist.length > 1){
+                stringlist = new String[templist.length + 1];
+                stringlist[0] = biomePanel.getRegistryName().getPath();
+                System.arraycopy(templist, 0, stringlist, 1, templist.length);
+            } else {
+                stringlist = new String[1];
+                stringlist[0] = biomePanel.getRegistryName().getPath();
+            }
+            listindex = 0;
+        }
     }
 
     /** Hooks into Render Event for Experience Bar, draws Biome Panel */
