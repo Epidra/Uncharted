@@ -1,13 +1,13 @@
 package mod.uncharted;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Biomes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
 
-public class GuiBiomePanel extends AbstractGui {
+public class GuiBiomePanel extends GuiScreen {
 
     /** Minecraft Instance */
     private Minecraft mc;
@@ -108,7 +108,7 @@ public class GuiBiomePanel extends AbstractGui {
     @SubscribeEvent
     public void onTravel(LivingEvent.LivingUpdateEvent event){
         boolean newBiome = false;
-        if(event.getEntity() instanceof PlayerEntity){
+        if(event.getEntity() instanceof EntityPlayer){
             if(event.getEntity().dimension == DimensionType.OVERWORLD){ // Checks for Overworld
                 if(event.getEntity().world.canBlockSeeSky(event.getEntity().getPosition())){
                     if(biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
@@ -173,19 +173,20 @@ public class GuiBiomePanel extends AbstractGui {
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             GL11.glDisable(GL11.GL_LIGHTING);
             this.mc.getTextureManager().bindTexture(biomeTextureOverlay);
-            this.blit(posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
+            this.drawTexturedModalRect(posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
             this.mc.getTextureManager().bindTexture(biomeTexture);
             if(animated){
                 Random r = new Random();
-                this.blit(posX, posY, r.nextInt(128), r.nextInt(256-64), 128, height);
+                this.drawTexturedModalRect(posX, posY, r.nextInt(128), r.nextInt(256-64), 128, height);
             } else {
-                this.blit(posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
+                this.drawTexturedModalRect(posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
             }
             GL11.glPushMatrix();
             GL11.glScalef(scale, scale, scale); {
                 DrawString(entering, posX + 2, posY + 2, false);
                 for(int i = 0; i < biomeName.length; i++){
-                    DrawString(biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
+                    //DrawString(biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
+                    DrawString(biomeName[i], posX + 2, posY + height - 10*biomeName.length + i*10, true);
                 }
             } GL11.glPopMatrix();
         }
@@ -193,8 +194,8 @@ public class GuiBiomePanel extends AbstractGui {
 
     private void DrawString(String text, int posX, int posY, boolean rightsided){
         if(rightsided){
-            drawRightAlignedString(mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
-            drawRightAlignedString(mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
+            drawString(mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
+            drawString(mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
         } else {
             drawString(mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY   )/scale), 0);
             drawString(mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
