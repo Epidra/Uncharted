@@ -177,7 +177,7 @@ public class GuiBiomePanel extends AbstractGui {
             this.mc.getTextureManager().bindTexture(biomeTexture);
             if(animated){
                 Random r = new Random();
-                this.blit(posX, posY, r.nextInt(128), r.nextInt(256-64), 128, height);
+                this.blit(posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
             } else {
                 this.blit(posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
             }
