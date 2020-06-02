@@ -1,0 +1,36 @@
+[
+{
+  "modid": "stairway",
+  "name": "Stairway to Aether",
+  "version": "Version 3",
+  "mcversion": "1.8.9",
+  "description": "The Road to Aether is paved with Slabs",
+  "credits": "Created by Me",
+  "logoFile": "assets/logo/Stairway.png",
+  "url": "http://minecraft.curseforge.com/projects/stairway-to-aether",
+  "updateUrl": "",
+  "authorList": [ "Epidra" ],
+  "parent": "",
+  "screenshots": [],
+  "dependencies": [
+     "mod_MinecraftForge"
+  ]
+},
+{
+  "modid": "uncharted",
+  "name": "Uncharted",
+  "version": "Version 2",
+  "mcversion": "1.8.9",
+  "description": "Your favourite Biome Panel",
+  "credits": "Created by Me",
+  "logoFile": "assets/logo/Uncharted.png",
+  "url": "http://minecraft.curseforge.com/projects/uncharted",
+  "updateUrl": "",
+  "authorList": [ "Epidra" ],
+  "parent": "",
+  "screenshots": [],
+  "dependencies": [
+     "mod_MinecraftForge"
+  ]
+}
+]
