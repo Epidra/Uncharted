@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[31,)"
+loaderVersion="[32,)"
 issueTrackerURL="https://github.com/Epidra/Uncharted/issues"
 [[mods]]
 modId="uncharted"
@@ -15,14 +15,8 @@ Or wondered if you are standing in a desert or just a really long beach?
 Say no more.
 '''
 [[dependencies.uncharted]]
-    modId="forge"
-    mandatory=true
-    versionRange="[31,)"
-    ordering="NONE"
-    side="BOTH"
-[[dependencies.uncharted]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.1]"
     ordering="NONE"
     side="BOTH"

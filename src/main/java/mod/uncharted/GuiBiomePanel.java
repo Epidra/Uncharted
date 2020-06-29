@@ -4,11 +4,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.Texture;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -108,7 +109,7 @@ public class GuiBiomePanel extends AbstractGui {
     public void onTravel(LivingEvent.LivingUpdateEvent event){
         boolean newBiome = false;
         if(event.getEntity() instanceof PlayerEntity){
-            if(event.getEntity().dimension == DimensionType.OVERWORLD){ // Checks for Overworld
+            if(event.getEntity() == DimensionType.){ // Checks for Overworld
                 if(event.getEntity().world.canBlockSeeSky(event.getEntity().getPosition())){
                     if(biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
                         newBiome = true;
@@ -124,8 +125,8 @@ public class GuiBiomePanel extends AbstractGui {
             biomePanel = event.getEntity().world.getBiome(event.getEntity().getPosition());
             transitionUp = true;
             //LoadBiome(biomePanel);
-            String translatedKey = net.minecraft.client.resources.I18n.format(biomePanel.getTranslationKey());
-            entering = net.minecraft.client.resources.I18n.format("gui.uncharted.entering");
+            String translatedKey = I18n.format(biomePanel.getTranslationKey());
+            entering = I18n.format("gui.uncharted.entering");
             biomeName = translatedKey.split(" ");
             String[] templist = biomePanel.getRegistryName().getPath().split("_");
             if(templist.length > 1){
@@ -177,7 +178,7 @@ public class GuiBiomePanel extends AbstractGui {
             this.mc.getTextureManager().bindTexture(biomeTexture);
             if(animated){
                 Random r = new Random();
-                this.blit(posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
+                this..blit(posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
             } else {
                 this.blit(posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
             }
