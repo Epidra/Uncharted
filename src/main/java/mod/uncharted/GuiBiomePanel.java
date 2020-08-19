@@ -1,16 +1,19 @@
 package mod.uncharted;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.Texture;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -62,7 +65,7 @@ public class GuiBiomePanel extends AbstractGui {
     public GuiBiomePanel(Minecraft mc) {
         super();
         this.mc = mc;
-        biomePanel  = Biomes.THE_END;
+        biomePanel  = null;
         transitionUp = true;
         timer = 0.00f;
         timerMax = 200;
@@ -71,8 +74,8 @@ public class GuiBiomePanel extends AbstractGui {
         biomeTexture        = new ResourceLocation(Uncharted.MODID, "textures/static.png");
         biomeTextureStatic  = new ResourceLocation(Uncharted.MODID, "textures/static.png");
         biomeTextureOverlay = new ResourceLocation(Uncharted.MODID, "textures/overlay.png");
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onTravel);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onRenderExperienceBar);
+        MinecraftForge.EVENT_BUS.addListener(this::onTravel);
+        MinecraftForge.EVENT_BUS.addListener(this::onRenderExperienceBar);
         smallFrame = UnchartedConfig.smallFrame;
         scale = (float)UnchartedConfig.scale/100.00f;
         borderLower = UnchartedConfig.borderLower;
@@ -109,14 +112,14 @@ public class GuiBiomePanel extends AbstractGui {
     public void onTravel(LivingEvent.LivingUpdateEvent event){
         boolean newBiome = false;
         if(event.getEntity() instanceof PlayerEntity){
-            if(event.getEntity() == DimensionType.){ // Checks for Overworld
+            if(event.getEntity().getEntityWorld().func_230315_m_().func_242725_p().getPath().contains(DimensionType.OVERWORLD.func_240901_a_().getPath())){ // Checks for Overworld
                 if(event.getEntity().world.canBlockSeeSky(event.getEntity().getPosition())){
-                    if(biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
+                    if(biomePanel == null || biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
                         newBiome = true;
                     }
                 }
             } else { // Other dimensions might have ceiling, hence cannot check for .canBlockSeeSky()
-                if(biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
+                if(biomePanel.getCategory().getName().contains(event.getEntity().world.getBiome(event.getEntity().getPosition()).getCategory().getName())){
                     newBiome = true;
                 }
             }
@@ -125,17 +128,17 @@ public class GuiBiomePanel extends AbstractGui {
             biomePanel = event.getEntity().world.getBiome(event.getEntity().getPosition());
             transitionUp = true;
             //LoadBiome(biomePanel);
-            String translatedKey = I18n.format(biomePanel.getTranslationKey());
+            String translatedKey = I18n.format(biomePanel.getCategory().getName());
             entering = I18n.format("gui.uncharted.entering");
             biomeName = translatedKey.split(" ");
-            String[] templist = biomePanel.getRegistryName().getPath().split("_");
+            String[] templist = biomePanel.toString().split("_");
             if(templist.length > 1){
                 stringlist = new String[templist.length + 1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
+                stringlist[0] = biomePanel.getCategory().getName();
                 System.arraycopy(templist, 0, stringlist, 1, templist.length);
             } else {
                 stringlist = new String[1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
+                stringlist[0] = biomePanel.getCategory().getName();
             }
             listindex = 0;
         }
@@ -174,32 +177,32 @@ public class GuiBiomePanel extends AbstractGui {
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             GL11.glDisable(GL11.GL_LIGHTING);
             this.mc.getTextureManager().bindTexture(biomeTextureOverlay);
-            this.blit(posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
+            this.blit(event.getMatrixStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
             this.mc.getTextureManager().bindTexture(biomeTexture);
             if(animated){
                 Random r = new Random();
-                this..blit(posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
+                this.blit(event.getMatrixStack(), posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
             } else {
-                this.blit(posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
+                this.blit(event.getMatrixStack(), posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
             }
             GL11.glPushMatrix();
             GL11.glScalef(scale, scale, scale); {
-                DrawString(entering, posX + 2, posY + 2, false);
+                DrawString(event.getMatrixStack(), entering, posX + 2, posY + 2, false);
                 for(int i = 0; i < biomeName.length; i++){
-                    DrawString(biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
+                    DrawString(event.getMatrixStack(), biomeName[i], posX + 2 /*124*/, posY + height - 10*biomeName.length + i*10, true);
                 }
             } GL11.glPopMatrix();
         }
     }
 
-    private void DrawString(String text, int posX, int posY, boolean rightsided){
-        if(rightsided){
-            drawRightAlignedString(mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
-            drawRightAlignedString(mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
-        } else {
-            drawString(mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
-            drawString(mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
-        }
+    private void DrawString(MatrixStack stack, String text, int posX, int posY, boolean rightsided){
+        //if(rightsided){
+        //    drawCenteredString(stack, mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
+        //    drawCenteredString(stack, mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
+        //} else {
+            drawString(stack, mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
+            drawString(stack, mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
+        //}
     }
 
 }
