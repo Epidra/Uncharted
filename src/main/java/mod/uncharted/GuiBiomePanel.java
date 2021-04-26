@@ -112,33 +112,38 @@ public class GuiBiomePanel extends AbstractGui {
     public void onTravel(LivingEvent.LivingUpdateEvent event){
         boolean newBiome = false;
         if(event.getEntity() instanceof PlayerEntity){
-            if(event.getEntity().getEntityWorld().func_230315_m_().func_242725_p().getPath().contains(DimensionType.OVERWORLD.func_240901_a_().getPath())){ // Checks for Overworld
-                if(event.getEntity().world.canBlockSeeSky(event.getEntity().getPosition())){
-                    if(biomePanel == null || biomePanel != event.getEntity().world.getBiome(event.getEntity().getPosition())){
+            if(event.getEntity().level.dimensionType().hasSkyLight()){ // Checks for Overworld
+                if(event.getEntity().level.canSeeSky(event.getEntity().blockPosition())){
+                    if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition())){
                         newBiome = true;
                     }
                 }
             } else { // Other dimensions might have ceiling, hence cannot check for .canBlockSeeSky()
-                if(biomePanel.getCategory().getName().contains(event.getEntity().world.getBiome(event.getEntity().getPosition()).getCategory().getName())){
+                if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition())){
                     newBiome = true;
                 }
             }
         }
         if(newBiome){ // trigger for when we travel into a new Biome
-            biomePanel = event.getEntity().world.getBiome(event.getEntity().getPosition());
+            biomePanel = event.getEntity().level.getBiome(event.getEntity().blockPosition());
             transitionUp = true;
             //LoadBiome(biomePanel);
-            String translatedKey = I18n.format(biomePanel.getCategory().getName());
-            entering = I18n.format("gui.uncharted.entering");
+            String a = I18n.get(biomePanel.getRegistryName().getPath());
+            String b = I18n.get(biomePanel.getRegistryName().getNamespace());
+            String translatedKey = I18n.get("biome." + b + "." + a);
+            entering = I18n.get("gui.uncharted.entering");
             biomeName = translatedKey.split(" ");
-            String[] templist = biomePanel.toString().split("_");
+            //for(int i = 0; i < biomeName.length; i++){
+            //    biomeName[i] = biomeName[i].trim();
+            //}
+            String[] templist = biomePanel.getRegistryName().getPath().split("_");
             if(templist.length > 1){
                 stringlist = new String[templist.length + 1];
-                stringlist[0] = biomePanel.getCategory().getName();
+                stringlist[0] = biomePanel.getRegistryName().getPath();
                 System.arraycopy(templist, 0, stringlist, 1, templist.length);
             } else {
                 stringlist = new String[1];
-                stringlist[0] = biomePanel.getCategory().getName();
+                stringlist[0] = biomePanel.getRegistryName().getPath();
             }
             listindex = 0;
         }
@@ -172,13 +177,13 @@ public class GuiBiomePanel extends AbstractGui {
             int v = 150;
             if(smallFrame) v-=56;
             int u = timer > v ? v/2 : (int)(timer/2);
-            posX = borderLeft ? 10 : mc.getMainWindow().getScaledWidth()-10-128;
-            posY = borderLower ? (int)(mc.getMainWindow().getScaledHeight()-u+8) : -(height+10)+u;
+            posX = borderLeft ? 10 : mc.getWindow().getGuiScaledWidth()-10-128;
+            posY = borderLower ? (int)(mc.getWindow().getGuiScaledHeight()-u+8) : -(height+10)+u;
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             GL11.glDisable(GL11.GL_LIGHTING);
-            this.mc.getTextureManager().bindTexture(biomeTextureOverlay);
+            this.mc.getTextureManager().bind(biomeTextureOverlay);
             this.blit(event.getMatrixStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
-            this.mc.getTextureManager().bindTexture(biomeTexture);
+            this.mc.getTextureManager().bind(biomeTexture);
             if(animated){
                 Random r = new Random();
                 this.blit(event.getMatrixStack(), posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
@@ -189,20 +194,21 @@ public class GuiBiomePanel extends AbstractGui {
             GL11.glScalef(scale, scale, scale); {
                 DrawString(event.getMatrixStack(), entering, posX + 2, posY + 2, false);
                 for(int i = 0; i < biomeName.length; i++){
-                    DrawString(event.getMatrixStack(), biomeName[i], posX + 2 /*124*/, posY + height - 10*biomeName.length + i*10, true);
+                    DrawString(event.getMatrixStack(), biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
                 }
             } GL11.glPopMatrix();
         }
     }
 
     private void DrawString(MatrixStack stack, String text, int posX, int posY, boolean rightsided){
-        //if(rightsided){
-        //    drawCenteredString(stack, mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
-        //    drawCenteredString(stack, mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
-        //} else {
-            drawString(stack, mc.fontRenderer, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
-            drawString(stack, mc.fontRenderer, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
-        //}
+        if(rightsided){
+            int z = mc.font.width(text)/2;
+            drawCenteredString(stack, mc.font, text, (int)((posX     - z)/scale), (int)((posY    )/scale), 0);
+            drawCenteredString(stack, mc.font, text, (int)((posX + 1 - z)/scale), (int)((posY + 1)/scale), 16777215);
+        } else {
+            drawString(stack, mc.font, text, (int)((posX    )/scale), (int)((posY    )/scale), 0);
+            drawString(stack, mc.font, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
+        }
     }
 
 }

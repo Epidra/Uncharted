@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @Mod("uncharted")
 public class Uncharted {
 
-    // Directly reference a log4j logger.
-    public static final Logger LOGGER = LogManager.getLogger();
     /** The Mod ID */
     public static final String MODID = "uncharted";
 
