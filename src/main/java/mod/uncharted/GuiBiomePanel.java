@@ -1,26 +1,24 @@
 package mod.uncharted;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.Texture;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.lwjgl.opengl.GL11;
 import java.util.Random;
 
-public class GuiBiomePanel extends AbstractGui {
+public class GuiBiomePanel extends GuiComponent {
 
     /** Minecraft Instance */
     private Minecraft mc;
@@ -89,7 +87,7 @@ public class GuiBiomePanel extends AbstractGui {
     }
 
     private void LoadBiome(){
-        Texture texture = mc.getTextureManager().getTexture(new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png"));
+        AbstractTexture texture = mc.getTextureManager().getTexture(new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png"));
         if(texture instanceof DynamicTexture) { // texture file not found
             listindex++;
             if (listindex == stringlist.length) {
@@ -111,7 +109,7 @@ public class GuiBiomePanel extends AbstractGui {
     @SubscribeEvent
     public void onTravel(LivingEvent.LivingUpdateEvent event){
         boolean newBiome = false;
-        if(event.getEntity() instanceof PlayerEntity){
+        if(event.getEntity() instanceof Player){
             if(event.getEntity().level.dimensionType().hasSkyLight()){ // Checks for Overworld
                 if(event.getEntity().level.canSeeSky(event.getEntity().blockPosition())){
                     if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition())){
@@ -153,7 +151,7 @@ public class GuiBiomePanel extends AbstractGui {
     @SubscribeEvent
     public void onRenderExperienceBar(RenderGameOverlayEvent event){
         // We don't want to draw into the Helmet Render Event
-        if(event.isCancelable() || event.getType() != RenderGameOverlayEvent.ElementType.HELMET){
+        if(event.isCancelable() || event.getType() != RenderGameOverlayEvent.ElementType.LAYER){
             return;
         }
 
@@ -162,13 +160,13 @@ public class GuiBiomePanel extends AbstractGui {
                 timer = timerMax;
                 transitionUp = false;
             } else {
-                timer += 1;
+                timer += 0.05f;
             }
         } else {
             if(timer <= 0){
                 timer = 0;
             } else {
-                timer -= 1;
+                timer -= 0.05f;
             }
         }
 
@@ -179,28 +177,28 @@ public class GuiBiomePanel extends AbstractGui {
             int u = timer > v ? v/2 : (int)(timer/2);
             posX = borderLeft ? 10 : mc.getWindow().getGuiScaledWidth()-10-128;
             posY = borderLower ? (int)(mc.getWindow().getGuiScaledHeight()-u+8) : -(height+10)+u;
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GL11.glDisable(GL11.GL_LIGHTING);
-            this.mc.getTextureManager().bind(biomeTextureOverlay);
+            //GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            //GL11.glDisable(GL11.GL_LIGHTING);
+            RenderSystem.setShaderTexture(0, biomeTextureOverlay);
             this.blit(event.getMatrixStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
-            this.mc.getTextureManager().bind(biomeTexture);
+            RenderSystem.setShaderTexture(0, biomeTexture);
             if(animated){
                 Random r = new Random();
                 this.blit(event.getMatrixStack(), posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
             } else {
                 this.blit(event.getMatrixStack(), posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
             }
-            GL11.glPushMatrix();
-            GL11.glScalef(scale, scale, scale); {
+            //GL11.glPushMatrix();
+            //GL11.glScalef(scale, scale, scale); {
                 DrawString(event.getMatrixStack(), entering, posX + 2, posY + 2, false);
                 for(int i = 0; i < biomeName.length; i++){
                     DrawString(event.getMatrixStack(), biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
                 }
-            } GL11.glPopMatrix();
+            //} GL11.glPopMatrix();
         }
     }
 
-    private void DrawString(MatrixStack stack, String text, int posX, int posY, boolean rightsided){
+    private void DrawString(PoseStack stack, String text, int posX, int posY, boolean rightsided){
         if(rightsided){
             int z = mc.font.width(text)/2;
             drawCenteredString(stack, mc.font, text, (int)((posX     - z)/scale), (int)((posY    )/scale), 0);
