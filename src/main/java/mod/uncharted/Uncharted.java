@@ -6,14 +6,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
-
 @Mod("uncharted")
 public class Uncharted {
 
     /** The Mod ID */
     public static final String MODID = "uncharted";
+
+
 
 
 
@@ -28,6 +27,8 @@ public class Uncharted {
 
 
 
+
+
     //----------------------------------------EVENTS----------------------------------------//
 
     /** Client Side Setup Event */
@@ -35,4 +36,7 @@ public class Uncharted {
         UnchartedConfig.load();
         MinecraftForge.EVENT_BUS.register(new GuiBiomePanel(Minecraft.getInstance()));
     }
+
+
+
 }
