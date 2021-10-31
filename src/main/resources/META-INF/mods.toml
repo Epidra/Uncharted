@@ -4,7 +4,7 @@ license="All rights reserved"
 issueTrackerURL="https://github.com/Epidra/Uncharted/issues"
 [[mods]]
 modId="uncharted"
-version="v06"
+version="v07"
 displayName="Uncharted" #mandatory
 displayURL="https://www.curseforge.com/minecraft/mc-mods/uncharted"
 logoFile="logo.png"
