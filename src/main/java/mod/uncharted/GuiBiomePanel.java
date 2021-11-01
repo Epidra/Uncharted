@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.texture.Texture;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -81,6 +82,7 @@ public class GuiBiomePanel extends AbstractGui {
         biomeTextureStatic  = new ResourceLocation(Uncharted.MODID, "textures/static.png");
         biomeTextureOverlay = new ResourceLocation(Uncharted.MODID, "textures/overlay.png");
         MinecraftForge.EVENT_BUS.addListener(this::onTravel);
+        MinecraftForge.EVENT_BUS.addListener(this::onClientTick);
         MinecraftForge.EVENT_BUS.addListener(this::onRenderExperienceBar);
         smallFrame = UnchartedConfig.smallFrame;
         scale = (float)UnchartedConfig.scale / 100.00f;
@@ -121,22 +123,27 @@ public class GuiBiomePanel extends AbstractGui {
         }
         if(newBiome){ // trigger for when we travel into a new Biome
             biomePanel = event.getEntity().level.getBiome(event.getEntity().blockPosition());
-            transitionUp = true;
-            String a = I18n.get(biomePanel.getRegistryName().getPath());
-            String b = I18n.get(biomePanel.getRegistryName().getNamespace());
-            String translatedKey = I18n.get("biome." + b + "." + a);
-            entering = I18n.get("gui.uncharted.entering");
-            biomeName = translatedKey.split(" ");
-            String[] templist = biomePanel.getRegistryName().getPath().split("_");
-            if(templist.length > 1){
-                stringlist = new String[templist.length + 1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
-                System.arraycopy(templist, 0, stringlist, 1, templist.length);
-            } else {
-                stringlist = new String[1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
+            if(mc.level != null){
+                ResourceLocation loc = mc.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(mc.level.getBiome(event.getEntity().blockPosition()));
+                if(loc != null){
+                    String a = I18n.get(loc.getPath());
+                    String b = I18n.get(loc.getNamespace());
+                    String translatedKey = I18n.get("biome." + b + "." + a);
+                    entering = I18n.get("gui.uncharted.entering");
+                    biomeName = translatedKey.split(" ");
+                    String[] templist = loc.getPath().split("_");
+                    if(templist.length > 1){
+                        stringlist = new String[templist.length + 1];
+                        stringlist[0] = loc.getPath();
+                        System.arraycopy(templist, 0, stringlist, 1, templist.length);
+                    } else {
+                        stringlist = new String[1];
+                        stringlist[0] = loc.getPath();
+                    }
+                    listindex = 0;
+                    transitionUp = true;
+                }
             }
-            listindex = 0;
         }
     }
 
@@ -223,5 +230,7 @@ public class GuiBiomePanel extends AbstractGui {
             drawString(stack, mc.font, text, (int)((posX + 1)/scale), (int)((posY + 1)/scale), 16777215);
         }
     }
+
+
 
 }
