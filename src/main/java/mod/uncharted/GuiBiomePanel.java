@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
@@ -15,7 +16,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
 
@@ -81,6 +81,7 @@ public class GuiBiomePanel extends GuiComponent {
         biomeTextureStatic  = new ResourceLocation(Uncharted.MODID, "textures/static.png");
         biomeTextureOverlay = new ResourceLocation(Uncharted.MODID, "textures/overlay.png");
         MinecraftForge.EVENT_BUS.addListener(this::onTravel);
+        MinecraftForge.EVENT_BUS.addListener(this::onClientTick);
         MinecraftForge.EVENT_BUS.addListener(this::onRenderExperienceBar);
         smallFrame = UnchartedConfig.smallFrame;
         borderLower = UnchartedConfig.borderLower;
@@ -120,22 +121,27 @@ public class GuiBiomePanel extends GuiComponent {
         }
         if(newBiome){ // trigger for when we travel into a new Biome
             biomePanel = event.getEntity().level.getBiome(event.getEntity().blockPosition());
-            transitionUp = true;
-            String a = I18n.get(biomePanel.getRegistryName().getPath());
-            String b = I18n.get(biomePanel.getRegistryName().getNamespace());
-            String translatedKey = I18n.get("biome." + b + "." + a);
-            entering = I18n.get("gui.uncharted.entering");
-            biomeName = translatedKey.split(" ");
-            String[] templist = biomePanel.getRegistryName().getPath().split("_");
-            if(templist.length > 1){
-                stringlist = new String[templist.length + 1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
-                System.arraycopy(templist, 0, stringlist, 1, templist.length);
-            } else {
-                stringlist = new String[1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
+            if(mc.level != null){
+                ResourceLocation loc = mc.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(mc.level.getBiome(event.getEntity().blockPosition()));
+                if(loc != null){
+                    String a = I18n.get(loc.getPath());
+                    String b = I18n.get(loc.getNamespace());
+                    String translatedKey = I18n.get("biome." + b + "." + a);
+                    entering = I18n.get("gui.uncharted.entering");
+                    biomeName = translatedKey.split(" ");
+                    String[] templist = loc.getPath().split("_");
+                    if(templist.length > 1){
+                        stringlist = new String[templist.length + 1];
+                        stringlist[0] = loc.getPath();
+                        System.arraycopy(templist, 0, stringlist, 1, templist.length);
+                    } else {
+                        stringlist = new String[1];
+                        stringlist[0] = loc.getPath();
+                    }
+                    listindex = 0;
+                    transitionUp = true;
+                }
             }
-            listindex = 0;
         }
     }
 
@@ -192,7 +198,7 @@ public class GuiBiomePanel extends GuiComponent {
 
 
 
-    //----------------------------------------CONSTRUCTOR----------------------------------------//
+    //----------------------------------------SUPPORT----------------------------------------//
 
     private void LoadBiome(){
         AbstractTexture texture = mc.getTextureManager().getTexture(new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png"));
@@ -219,5 +225,7 @@ public class GuiBiomePanel extends GuiComponent {
             drawString(stack, mc.font, text, ((posX + 1)), ((posY + 1)), 16777215);
         }
     }
+
+
 
 }
