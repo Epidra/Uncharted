@@ -3,7 +3,7 @@ loaderVersion="[31,)"
 issueTrackerURL="https://github.com/Epidra/Uncharted/issues"
 [[mods]]
 modId="uncharted"
-version="v07"
+version="v08"
 displayName="Uncharted" #mandatory
 displayURL="https://www.curseforge.com/minecraft/mc-mods/uncharted"
 logoFile="uncharted.png"

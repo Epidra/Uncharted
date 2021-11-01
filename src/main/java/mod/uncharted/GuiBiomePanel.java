@@ -4,8 +4,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.Texture;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.dimension.DimensionType;
@@ -81,6 +83,7 @@ public class GuiBiomePanel extends AbstractGui {
         biomeTextureStatic  = new ResourceLocation(Uncharted.MODID, "textures/static.png");
         biomeTextureOverlay = new ResourceLocation(Uncharted.MODID, "textures/overlay.png");
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onTravel);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientTick);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onRenderExperienceBar);
         smallFrame = UnchartedConfig.smallFrame;
         scale = (float)UnchartedConfig.scale / 100.00f;
@@ -121,20 +124,27 @@ public class GuiBiomePanel extends AbstractGui {
         }
         if(newBiome){ // trigger for when we travel into a new Biome
             biomePanel = event.getEntity().world.getBiome(event.getEntity().getPosition());
-            transitionUp = true;
-            String translatedKey = net.minecraft.client.resources.I18n.format(biomePanel.getTranslationKey());
-            entering = net.minecraft.client.resources.I18n.format("gui.uncharted.entering");
-            biomeName = translatedKey.split(" ");
-            String[] templist = biomePanel.getRegistryName().getPath().split("_");
-            if(templist.length > 1){
-                stringlist = new String[templist.length + 1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
-                System.arraycopy(templist, 0, stringlist, 1, templist.length);
-            } else {
-                stringlist = new String[1];
-                stringlist[0] = biomePanel.getRegistryName().getPath();
+            if(mc.world != null){
+                ResourceLocation loc = Registry.BIOME.getKey(this.mc.world.getBiome(event.getEntity().getPosition()));
+                if(loc != null){
+                    String a = I18n.format(loc.getPath());
+                    String b = I18n.format(loc.getNamespace());
+                    String translatedKey = I18n.format("biome." + b + "." + a);
+                    entering = I18n.format("gui.uncharted.entering");
+                    biomeName = translatedKey.split(" ");
+                    String[] templist = loc.getPath().split("_");
+                    if(templist.length > 1){
+                        stringlist = new String[templist.length + 1];
+                        stringlist[0] = loc.getPath();
+                        System.arraycopy(templist, 0, stringlist, 1, templist.length);
+                    } else {
+                        stringlist = new String[1];
+                        stringlist[0] = loc.getPath();
+                    }
+                    listindex = 0;
+                    transitionUp = true;
+                }
             }
-            listindex = 0;
         }
     }
 
