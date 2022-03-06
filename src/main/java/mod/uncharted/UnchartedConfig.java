@@ -14,9 +14,9 @@ public class UnchartedConfig {
     private static ConfigValue<Integer> cv_timer;
     private static ConfigValue<Integer> cv_speed;
 
-    public static boolean smallFrame = true;
+    public static boolean smallFrame  = true;
     public static boolean borderLower = true;
-    public static boolean borderLeft = false;
+    public static boolean borderLeft  = false;
     public static int timer = 100;
     public static int speed = 200;
 
@@ -39,10 +39,9 @@ public class UnchartedConfig {
 
     @SuppressWarnings("unchecked")
     public static void load() {
-        //debugger = cv_debugger.get();
-        smallFrame = cv_smallFrame.get();
+        smallFrame  = cv_smallFrame.get();
         borderLower = cv_borderLower.get();
-        borderLeft = cv_borderLeft.get();
+        borderLeft  = cv_borderLeft.get();
         timer = cv_timer.get();
         speed = cv_speed.get();
     }

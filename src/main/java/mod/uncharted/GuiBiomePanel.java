@@ -109,20 +109,20 @@ public class GuiBiomePanel extends GuiComponent {
         if(event.getEntity() instanceof Player){
             if(event.getEntity().level.dimensionType().hasSkyLight()){ // Checks for Overworld
                 if(event.getEntity().level.canSeeSky(event.getEntity().blockPosition())){
-                    if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition())){
+                    if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition()).value()){
                         newBiome = true;
                     }
                 }
             } else { // Other dimensions might have ceiling, hence cannot check for .canBlockSeeSky()
-                if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition())){
+                if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition()).value()){
                     newBiome = true;
                 }
             }
         }
         if(newBiome){ // trigger for when we travel into a new Biome
-            biomePanel = event.getEntity().level.getBiome(event.getEntity().blockPosition());
+            biomePanel = event.getEntity().level.getBiome(event.getEntity().blockPosition()).value();
             if(mc.level != null){
-                ResourceLocation loc = mc.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(mc.level.getBiome(event.getEntity().blockPosition()));
+                ResourceLocation loc = mc.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(mc.level.getBiome(event.getEntity().blockPosition()).value());
                 if(loc != null){
                     String a = I18n.get(loc.getPath());
                     String b = I18n.get(loc.getNamespace());
@@ -177,7 +177,7 @@ public class GuiBiomePanel extends GuiComponent {
             if(smallFrame) v-=56;
             int u = timer > v ? v/2 : (int)(timer/2);
             posX = borderLeft ? 10 : mc.getWindow().getGuiScaledWidth()-10-128;
-            posY = borderLower ? (int)(mc.getWindow().getGuiScaledHeight()-u+8) : -(height+10)+u;
+            posY = borderLower ? (mc.getWindow().getGuiScaledHeight()-u+8) : -(height+10)+u;
             RenderSystem.setShaderTexture(0, biomeTextureOverlay);
             this.blit(event.getMatrixStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
             RenderSystem.setShaderTexture(0, biomeTexture);
