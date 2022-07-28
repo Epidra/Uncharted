@@ -11,7 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -83,11 +83,11 @@ public class GuiBiomePanel extends GuiComponent {
         MinecraftForge.EVENT_BUS.addListener(this::onTravel);
         MinecraftForge.EVENT_BUS.addListener(this::onClientTick);
         MinecraftForge.EVENT_BUS.addListener(this::onRenderExperienceBar);
-        smallFrame = UnchartedConfig.smallFrame;
-        borderLower = UnchartedConfig.borderLower;
-        borderLeft = UnchartedConfig.borderLeft;
-        timerMax = 100 + UnchartedConfig.timer;
-        speed = UnchartedConfig.speed / 100.00f;
+        smallFrame  = Config.CONFIG.smallFrame.get();
+        borderLower = Config.CONFIG.borderLower.get();
+        borderLeft  = Config.CONFIG.borderLeft.get();
+        timerMax    = 100 + Config.CONFIG.timer.get();
+        speed       = Config.CONFIG.speed.get() / 100.00f;
         if(smallFrame){
             height = 32;
             timerMax -=56;
@@ -104,7 +104,7 @@ public class GuiBiomePanel extends GuiComponent {
 
     /** Event fires on Player Movement, checks if Player moves into a new Biome */
     @SubscribeEvent
-    public void onTravel(LivingEvent.LivingUpdateEvent event){
+    public void onTravel(LivingEvent event){
         boolean newBiome = false;
         if(event.getEntity() instanceof Player){
             if(event.getEntity().level.dimensionType().hasSkyLight()){ // Checks for Overworld
@@ -166,9 +166,9 @@ public class GuiBiomePanel extends GuiComponent {
 
     /** Hooks into Render Event for Experience Bar, draws Biome Panel */
     @SubscribeEvent
-    public void onRenderExperienceBar(RenderGameOverlayEvent event){
+    public void onRenderExperienceBar(RenderGuiOverlayEvent event){
         // We don't want to draw into the Helmet Render Event
-        if(event.isCancelable() || event.getType() != RenderGameOverlayEvent.ElementType.LAYER){
+        if(event.isCancelable()){
             return;
         }
         if(timer > 0){
@@ -179,17 +179,17 @@ public class GuiBiomePanel extends GuiComponent {
             posX = borderLeft ? 10 : mc.getWindow().getGuiScaledWidth()-10-128;
             posY = borderLower ? (mc.getWindow().getGuiScaledHeight()-u+8) : -(height+10)+u;
             RenderSystem.setShaderTexture(0, biomeTextureOverlay);
-            this.blit(event.getMatrixStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
+            this.blit(event.getPoseStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
             RenderSystem.setShaderTexture(0, biomeTexture);
             if(animated){
                 Random r = new Random();
-                this.blit(event.getMatrixStack(), posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
+                this.blit(event.getPoseStack(), posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
             } else {
-                this.blit(event.getMatrixStack(), posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
+                this.blit(event.getPoseStack(), posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
             }
-            DrawString(event.getMatrixStack(), entering, posX + 2, posY + 2, false);
+            DrawString(event.getPoseStack(), entering, posX + 2, posY + 2, false);
             for(int i = 0; i < biomeName.length; i++){
-                DrawString(event.getMatrixStack(), biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
+                DrawString(event.getPoseStack(), biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
             }
         }
     }
