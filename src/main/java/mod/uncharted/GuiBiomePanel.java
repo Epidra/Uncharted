@@ -83,11 +83,11 @@ public class GuiBiomePanel extends GuiComponent {
         MinecraftForge.EVENT_BUS.addListener(this::onTravel);
         MinecraftForge.EVENT_BUS.addListener(this::onClientTick);
         MinecraftForge.EVENT_BUS.addListener(this::onRenderExperienceBar);
-        smallFrame = UnchartedConfig.smallFrame;
-        borderLower = UnchartedConfig.borderLower;
-        borderLeft = UnchartedConfig.borderLeft;
-        timerMax = 100 + UnchartedConfig.timer;
-        speed = UnchartedConfig.speed / 100.00f;
+        smallFrame  = Config.CONFIG.smallFrame.get();
+        borderLower = Config.CONFIG.borderLower.get();
+        borderLeft  = Config.CONFIG.borderLeft.get();
+        timerMax    = 100 + Config.CONFIG.timer.get();
+        speed       = Config.CONFIG.speed.get() / 100.00f;
         if(smallFrame){
             height = 32;
             timerMax -=56;
