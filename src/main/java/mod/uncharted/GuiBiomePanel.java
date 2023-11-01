@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -105,6 +106,7 @@ public class GuiBiomePanel extends GuiComponent {
     /** Event fires on Player Movement, checks if Player moves into a new Biome */
     @SubscribeEvent
     public void onTravel(LivingEvent event){
+
         boolean newBiome = false;
         if(event.getEntity() instanceof Player){
             if(event.getEntity().level.dimensionType().hasSkyLight()){ // Checks for Overworld
@@ -122,25 +124,42 @@ public class GuiBiomePanel extends GuiComponent {
         if(newBiome){ // trigger for when we travel into a new Biome
             biomePanel = event.getEntity().level.getBiome(event.getEntity().blockPosition()).value();
             if(mc.level != null){
-                ResourceLocation loc = mc.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(mc.level.getBiome(event.getEntity().blockPosition()).value());
-                if(loc != null){
-                    String a = I18n.get(loc.getPath());
-                    String b = I18n.get(loc.getNamespace());
-                    String translatedKey = I18n.get("biome." + b + "." + a);
-                    entering = I18n.get("gui.uncharted.entering");
-                    biomeName = translatedKey.split(" ");
-                    String[] templist = loc.getPath().split("_");
-                    if(templist.length > 1){
-                        stringlist = new String[templist.length + 1];
-                        stringlist[0] = loc.getPath();
-                        System.arraycopy(templist, 0, stringlist, 1, templist.length);
-                    } else {
-                        stringlist = new String[1];
-                        stringlist[0] = loc.getPath();
-                    }
-                    listindex = 0;
-                    transitionUp = true;
+                String s = printBiome(event.getEntity().level.getBiome(event.getEntity().blockPosition()));
+                String[] l = s.split(":");
+                String translatedKey = I18n.get("biome." + l[0] + "." + l[1]);
+                entering = I18n.get("gui.uncharted.entering");
+                biomeName = translatedKey.split(" ");
+                String[] templist = s.split("_");
+                if(templist.length > 1){
+                    stringlist = new String[templist.length + 1];
+                    stringlist[0] = s;
+                    System.arraycopy(templist, 0, stringlist, 1, templist.length);
+                } else {
+                    stringlist = new String[1];
+                    stringlist[0] = s;
                 }
+                listindex = 0;
+                transitionUp = true;
+
+                // ResourceLocation loc = mc.level.registryAccess().registries().registryOrThrow(Registry.BIOME_REGISTRY).getKey(mc.level.getBiome(event.getEntity().blockPosition()).value());
+                // if(loc != null){
+                //     String a = I18n.get(loc.getPath());
+                //     String b = I18n.get(loc.getNamespace());
+                //     String translatedKey = I18n.get("biome." + b + "." + a);
+                //     entering = I18n.get("gui.uncharted.entering");
+                //     biomeName = translatedKey.split(" ");
+                //     String[] templist = loc.getPath().split("_");
+                //     if(templist.length > 1){
+                //         stringlist = new String[templist.length + 1];
+                //         stringlist[0] = loc.getPath();
+                //         System.arraycopy(templist, 0, stringlist, 1, templist.length);
+                //     } else {
+                //         stringlist = new String[1];
+                //         stringlist[0] = loc.getPath();
+                //     }
+                //     listindex = 0;
+                //     transitionUp = true;
+                // }
             }
         }
     }
@@ -168,9 +187,9 @@ public class GuiBiomePanel extends GuiComponent {
     @SubscribeEvent
     public void onRenderExperienceBar(RenderGuiOverlayEvent event){
         // We don't want to draw into the Helmet Render Event
-        if(event.isCancelable()){
-            return;
-        }
+        // if(event.isCancelable()){
+        //     return;
+        // }
         if(timer > 0){
             LoadBiome();
             int v = 150;
@@ -199,6 +218,14 @@ public class GuiBiomePanel extends GuiComponent {
 
 
     //----------------------------------------SUPPORT----------------------------------------//
+
+    private static String printBiome(Holder<Biome> p_205375_) {
+        return p_205375_.unwrap().map((p_205377_) -> {
+            return p_205377_.location().toString();
+        }, (p_205367_) -> {
+            return "[unregistered " + p_205367_ + "]";
+        });
+    }
 
     private void LoadBiome(){
         AbstractTexture texture = mc.getTextureManager().getTexture(new ResourceLocation(Uncharted.MODID , "textures/biomes/" + stringlist[listindex] + ".png"));
