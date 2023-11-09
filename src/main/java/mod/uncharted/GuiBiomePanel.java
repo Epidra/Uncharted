@@ -3,7 +3,6 @@ package mod.uncharted;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
@@ -20,7 +19,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.Random;
 
-public class GuiBiomePanel extends GuiComponent {
+public class GuiBiomePanel { // extends GuiComponent {
 
     /** Minecraft Instance */
     private Minecraft mc;
@@ -109,22 +108,22 @@ public class GuiBiomePanel extends GuiComponent {
 
         boolean newBiome = false;
         if(event.getEntity() instanceof Player){
-            if(event.getEntity().level.dimensionType().hasSkyLight()){ // Checks for Overworld
-                if(event.getEntity().level.canSeeSky(event.getEntity().blockPosition())){
-                    if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition()).value()){
+            if(event.getEntity().level().dimensionType().hasSkyLight()){ // Checks for Overworld
+                if(event.getEntity().level().canSeeSky(event.getEntity().blockPosition())){
+                    if(biomePanel == null || biomePanel != event.getEntity().level().getBiome(event.getEntity().blockPosition()).value()){
                         newBiome = true;
                     }
                 }
             } else { // Other dimensions might have ceiling, hence cannot check for .canBlockSeeSky()
-                if(biomePanel == null || biomePanel != event.getEntity().level.getBiome(event.getEntity().blockPosition()).value()){
+                if(biomePanel == null || biomePanel != event.getEntity().level().getBiome(event.getEntity().blockPosition()).value()){
                     newBiome = true;
                 }
             }
         }
         if(newBiome){ // trigger for when we travel into a new Biome
-            biomePanel = event.getEntity().level.getBiome(event.getEntity().blockPosition()).value();
+            biomePanel = event.getEntity().level().getBiome(event.getEntity().blockPosition()).value();
             if(mc.level != null){
-                String s = printBiome(event.getEntity().level.getBiome(event.getEntity().blockPosition()));
+                String s = printBiome(event.getEntity().level().getBiome(event.getEntity().blockPosition()));
                 String[] l = s.split(":");
                 String translatedKey = I18n.get("biome." + l[0] + "." + l[1]);
                 entering = I18n.get("gui.uncharted.entering");
@@ -191,25 +190,25 @@ public class GuiBiomePanel extends GuiComponent {
         //     return;
         // }
         if(timer > 0){
-            LoadBiome();
-            int v = 150;
-            if(smallFrame) v-=56;
-            int u = timer > v ? v/2 : (int)(timer/2);
-            posX = borderLeft ? 10 : mc.getWindow().getGuiScaledWidth()-10-128;
-            posY = borderLower ? (mc.getWindow().getGuiScaledHeight()-u+8) : -(height+10)+u;
-            RenderSystem.setShaderTexture(0, biomeTextureOverlay);
-            this.blit(event.getPoseStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
-            RenderSystem.setShaderTexture(0, biomeTexture);
-            if(animated){
-                Random r = new Random();
-                this.blit(event.getPoseStack(), posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
-            } else {
-                this.blit(event.getPoseStack(), posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
-            }
-            DrawString(event.getPoseStack(), entering, posX + 2, posY + 2, false);
-            for(int i = 0; i < biomeName.length; i++){
-                DrawString(event.getPoseStack(), biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
-            }
+            // LoadBiome();
+            // int v = 150;
+            // if(smallFrame) v-=56;
+            // int u = timer > v ? v/2 : (int)(timer/2);
+            // posX = borderLeft ? 10 : mc.getWindow().getGuiScaledWidth()-10-128;
+            // posY = borderLower ? (mc.getWindow().getGuiScaledHeight()-u+8) : -(height+10)+u;
+            // RenderSystem.setShaderTexture(0, biomeTextureOverlay);
+            // this.blit(event.getPoseStack(), posX-4, posY-4, 0,smallFrame ? 128 : 0, 128+8, 64+8);
+            // RenderSystem.setShaderTexture(0, biomeTexture);
+            // if(animated){
+            //     Random r = new Random();
+            //     this.blit(event.getPoseStack(), posX, posY + (smallFrame ? 1 : 0), r.nextInt(128), r.nextInt(256-64), 128, height);
+            // } else {
+            //     this.blit(event.getPoseStack(), posX, posY + (smallFrame ? 1 : 0), 0, smallFrame ? 16 : 0, 128, height);
+            // }
+            // DrawString(event.getPoseStack(), entering, posX + 2, posY + 2, false);
+            // for(int i = 0; i < biomeName.length; i++){
+            //     DrawString(event.getPoseStack(), biomeName[i], posX + 124, posY + height - 10*biomeName.length + i*10, true);
+            // }
         }
     }
 
@@ -243,14 +242,14 @@ public class GuiBiomePanel extends GuiComponent {
     }
 
     private void DrawString(PoseStack stack, String text, int posX, int posY, boolean rightsided){
-        if(rightsided){
-            int z = mc.font.width(text)/2;
-            drawCenteredString(stack, mc.font, text, ((posX     - z)), ((posY    )), 0);
-            drawCenteredString(stack, mc.font, text, ((posX + 1 - z)), ((posY + 1)), 16777215);
-        } else {
-            drawString(stack, mc.font, text, ((posX    )), ((posY    )), 0);
-            drawString(stack, mc.font, text, ((posX + 1)), ((posY + 1)), 16777215);
-        }
+        // if(rightsided){
+        //     int z = mc.font.width(text)/2;
+        //     drawCenteredString(stack, mc.font, text, ((posX     - z)), ((posY    )), 0);
+        //     drawCenteredString(stack, mc.font, text, ((posX + 1 - z)), ((posY + 1)), 16777215);
+        // } else {
+        //     drawString(stack, mc.font, text, ((posX    )), ((posY    )), 0);
+        //     drawString(stack, mc.font, text, ((posX + 1)), ((posY + 1)), 16777215);
+        // }
     }
 
 
